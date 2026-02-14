@@ -20,7 +20,11 @@ export function handleRollCommand(body: string): string {
         if (parsed.isExploding) {
             const count = safeInt(parsed.countExpr, '주사위 개수', 1, 100);
             const threshold = safeInt(parsed.explodeThreshold!, '크리 임계값', 2, 10);
-            const result = rollCriticalDice(count, threshold);
+
+            const bonus = parsed.modifierExpr
+                ? safeInt(parsed.modifierExpr, '보정값', -1000, 1000)
+                : 0;
+            const result = rollCriticalDice(count, threshold, bonus);
             return formatCriticalResult(result);
         } else {
             const result = rollNormalDice(
