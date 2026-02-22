@@ -8,7 +8,7 @@ function parseDurationKorean(input: string): ParsedDuration | null {
   const s = input.trim();
   if (!s) return null;
 
-  const re = /(\d+)\s*(초|분|시간|s|m|h)\b/gi;
+  const re = /(\d+)\s*(초|분|시간|s|m|h)(?=\s|$)/gi;
   let totalMs = 0;
   let matched = false;
 
@@ -40,7 +40,7 @@ function parseDurationKorean(input: string): ParsedDuration | null {
 }
 
 function stripDurationTokens(body: string) {
-  return body.replace(/(\d+)\s*(초|분|시간|s|m|h)\b/gi, '').trim();
+  return body.replace(/(\d+)\s*(초|분|시간|s|m|h)(?=\s|$)/gi, '').trim();
 }
 
 function formatRemain(ms: number) {
