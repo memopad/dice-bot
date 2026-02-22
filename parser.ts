@@ -10,10 +10,10 @@ export type CommandType =
     | 'menu-add'
     | 'menu-remove'
     | 'menu-list'
-    | 'timer';
+    | 'timer'
     | 'timer-list'
     | 'timer-cancel'
-    | 'timer-clear'
+    | 'timer-clear';
 
 export interface ParsedCommand {
     type: CommandType;
