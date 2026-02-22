@@ -3,8 +3,10 @@ import { config } from 'dotenv';
 import { parseCommand } from './parser';
 import { handleRollCommand } from './rollHandler';
 import { parseCalcCommand } from './calcHandler';
+import { handleOmikujiCommand } from './omikujiHandler';
+import { pickMenu, addMenu, removeMenu, listMenus } from './menuHandler';
 
-config(); // .env 로딩
+config();
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
@@ -21,28 +23,36 @@ client.on('messageCreate', async (message) => {
   const parsed = parseCommand(content);
   if (!parsed) return;
 
-    let reply: string | undefined;
+  let reply: string | undefined;
 
+  if (parsed.type.includes('roll')) {
+    reply = handleRollCommand(parsed.body);
+  } else if (parsed.type.includes('calc')) {
+    const result = parseCalcCommand(parsed.body);
+    reply = typeof result === 'string' ? result : result.result;
+  } else if (parsed.type === 'omikuji') {
+    reply = handleOmikujiCommand();
+  } else if (parsed.type === 'menu') {
+    reply = pickMenu();
+  } else if (parsed.type === 'menu-add') {
+    reply = addMenu(parsed.body);
+  } else if (parsed.type === 'menu-remove') {
+    reply = removeMenu(parsed.body);
+  } else if (parsed.type === 'menu-list') {
+    reply = listMenus();
+  }
 
-    if (parsed.type.includes('roll')) {
-        reply = handleRollCommand(parsed.body);
-    } else if (parsed.type.includes('calc')) {
-        const result = parseCalcCommand(parsed.body);
-        reply = typeof result === 'string' ? result : result.result;
-    }
+  if (parsed.type.startsWith('secret')) {
+    reply = `||${reply}||`;
+  }
 
-    if (parsed.type.startsWith('secret')) {
-        reply = `||${reply}||`; // 디스코드 스포일러 처리
-    }
-
-    // ❗ 여기가 중요합니다
-    if (reply !== undefined) {
-        await message.reply(reply);
-    }
-
+  if (reply !== undefined) {
+    await message.reply(reply);
+  }
 });
 
 client.login(process.env.BOT_TOKEN);
+
 
 import http from 'http';
 

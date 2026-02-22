@@ -4,19 +4,41 @@ export type CommandType =
     | 'secret-roll'
     | 'secret-calc'
     | 'choice'
-    | 'secret-choice';
+    | 'secret-choice'
+    | 'omikuji'
+    | 'menu'
+    | 'menu-add'
+    | 'menu-remove'
+    | 'menu-list';
 
 export interface ParsedCommand {
     type: CommandType;
     body: string;
 }
 
-
-
-
 export function parseCommand(input: string): ParsedCommand | null {
     const trimmed = input.trim();
 
+    // ✅ 오미쿠지: /오미쿠지
+    if (trimmed === '/오미쿠지') {
+        return { type: 'omikuji', body: '' };
+    }
+
+    // ✅ 메뉴 추천/관리
+    if (trimmed === '/메뉴') {
+        return { type: 'menu', body: '' };
+    }
+    if (trimmed === '/메뉴목록') {
+        return { type: 'menu-list', body: '' };
+    }
+    if (trimmed.startsWith('/메뉴추가 ')) {
+        return { type: 'menu-add', body: trimmed.slice('/메뉴추가 '.length).trim() };
+    }
+    if (trimmed.startsWith('/메뉴삭제 ')) {
+        return { type: 'menu-remove', body: trimmed.slice('/메뉴삭제 '.length).trim() };
+    }
+
+    // 기존 커맨드 (메시지 기반)
     if (trimmed.startsWith('/sr ')) {
         return { type: 'secret-roll', body: trimmed.slice(4).trim() };
     }
