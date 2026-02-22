@@ -5,6 +5,9 @@ import { handleRollCommand } from './rollHandler';
 import { parseCalcCommand } from './calcHandler';
 import { handleOmikujiCommand } from './omikujiHandler';
 import { pickMenu, addMenu, removeMenu, listMenus } from './menuHandler';
+import { handleTimerCommand } from './timerHandler';
+import { rescheduleNextTimer } from './timerService';
+import { handleTimerCreate, handleTimerList, handleTimerCancel, handleTimerClear } from './timerHandler';
 
 config();
 
@@ -14,6 +17,7 @@ const client = new Client({
 
 client.on('ready', () => {
   console.log(`✅ Logged in as ${client.user?.tag}`);
+  rescheduleNextTimer(client);
 });
 
 client.on('messageCreate', async (message) => {
@@ -40,6 +44,14 @@ client.on('messageCreate', async (message) => {
     reply = removeMenu(parsed.body);
   } else if (parsed.type === 'menu-list') {
     reply = listMenus();
+  } else if (parsed.type === 'timer') {
+    reply = handleTimerCreate(client, message, parsed.body);
+  } else if (parsed.type === 'timer-list') {
+    reply = handleTimerList(message);
+  } else if (parsed.type === 'timer-cancel') {
+    reply = handleTimerCancel(client, message, parsed.body);
+  } else if (parsed.type === 'timer-clear') {
+    reply = handleTimerClear(client, message);
   }
 
   if (parsed.type.startsWith('secret')) {

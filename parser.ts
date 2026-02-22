@@ -9,7 +9,11 @@ export type CommandType =
     | 'menu'
     | 'menu-add'
     | 'menu-remove'
-    | 'menu-list';
+    | 'menu-list'
+    | 'timer';
+    | 'timer-list'
+    | 'timer-cancel'
+    | 'timer-clear'
 
 export interface ParsedCommand {
     type: CommandType;
@@ -19,6 +23,18 @@ export interface ParsedCommand {
 export function parseCommand(input: string): ParsedCommand | null {
     const trimmed = input.trim();
 
+    if (trimmed.startsWith('/t ')) {
+      return { type: 'timer', body: trimmed.slice(3).trim() };
+    }
+    if (trimmed === '/tlist') {
+      return { type: 'timer-list', body: '' };
+    }
+    if (trimmed.startsWith('/tcancel ')) {
+      return { type: 'timer-cancel', body: trimmed.slice('/tcancel '.length).trim() };
+    }
+    if (trimmed === '/tclear') {
+      return { type: 'timer-clear', body: '' };
+    }
     // ✅ 오미쿠지: /오미쿠지
     if (trimmed === '/오미쿠지') {
         return { type: 'omikuji', body: '' };
@@ -51,6 +67,7 @@ export function parseCommand(input: string): ParsedCommand | null {
     if (trimmed.startsWith('/c ')) {
         return { type: 'calc', body: trimmed.slice(3).trim() };
     }
+
 
     return null;
 }

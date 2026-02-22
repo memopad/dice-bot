@@ -16,4 +16,22 @@ db.exec(`
     name TEXT NOT NULL UNIQUE,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS timers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    guild_id TEXT,
+    channel_id TEXT NOT NULL,
+    message_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    memo TEXT,
+    due_at INTEGER NOT NULL,      -- UNIX epoch ms
+    created_at INTEGER NOT NULL,  -- UNIX epoch ms
+    fired_at INTEGER              -- NULL이면 아직 안 울림
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_timers_due
+  ON timers (fired_at, due_at);
+
+  CREATE INDEX IF NOT EXISTS idx_timers_user
+  ON timers (user_id, fired_at, due_at);
 `);
