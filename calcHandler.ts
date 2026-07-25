@@ -7,7 +7,7 @@ export interface CalcResult {
 }
 
 export function parseCalcCommand(input: string): CalcResult {
-    const trimmed = input.trim();
+    const trimmed = input.normalize('NFKC').trim();
 
     if (!trimmed) {
         return {
@@ -17,11 +17,11 @@ export function parseCalcCommand(input: string): CalcResult {
         };
     }
 
-    // ➗ 1️⃣ 몫/나머지 처리: 10//3
-    const divMatch = trimmed.match(/^(\d+)\s*\/\/\s*(\d+)$/);
+    // 몫/나머지 처리: /c 10//3
+    const divMatch = trimmed.match(/^([+\-]?\d+)\s*\/\/\s*([+\-]?\d+)$/);
     if (divMatch) {
-        const left = parseInt(divMatch[1], 10);
-        const right = parseInt(divMatch[2], 10);
+        const left = parseInt(divMatch[1]!, 10);
+        const right = parseInt(divMatch[2]!, 10);
 
         if (right === 0) {
             return {
@@ -41,14 +41,13 @@ export function parseCalcCommand(input: string): CalcResult {
         };
     }
 
-    // 🧮 2️⃣ 숫자/연산자만 있을 때만 계산 시도
-    const looksLikeMath = /^[\d+\-*/^().\s]+$/;
-
+    // 숫자/연산자만 있으면 계산합니다.
+    const looksLikeMath = /^[\d+\-*/%^().\s]+$/;
     if (looksLikeMath.test(trimmed)) {
         try {
             const value = evaluate(trimmed);
 
-            if (typeof value === 'number') {
+            if (typeof value === 'number' && Number.isFinite(value)) {
                 const formatted =
                     Math.floor(value) !== value
                         ? value.toFixed(3).replace(/\.?0+$/, '')
@@ -67,34 +66,38 @@ export function parseCalcCommand(input: string): CalcResult {
                 type: 'normal',
             };
         } catch {
-            // 계산 실패 → 아래 choice fallback
+            // 계산 실패 시 아래 선택지 처리로 넘어갑니다.
         }
     }
 
-    // 🎲 3️⃣ fallback choice 처리
-    // 괄호 제거 (A,B,C) 형태 지원
-    const normalized = trimmed.replace(/^\(|\)$/g, '');
+    // /c (선택지1, 선택지2, 선택지3)
+    // 바깥 괄호만 제거하고, 쉼표만 기준으로 나눕니다.
+    // 따라서 "매운 라면"처럼 공백이 포함된 선택지도 하나로 유지됩니다.
+    const normalized =
+        trimmed.startsWith('(') && trimmed.endsWith(')')
+            ? trimmed.slice(1, -1).trim()
+            : trimmed;
 
-    const candidates = normalized
-        .split(/[\s,]+/)
-        .map((s) => s.trim())
-        .filter((s) => s.length > 0);
+    if (normalized.includes(',')) {
+        const candidates = normalized
+            .split(',')
+            .map((value) => value.trim())
+            .filter((value) => value.length > 0);
 
-    if (candidates.length >= 2) {
-        const chosen =
-            candidates[Math.floor(Math.random() * candidates.length)];
+        if (candidates.length >= 2) {
+            const chosen = candidates[Math.floor(Math.random() * candidates.length)];
 
-        return {
-            expression: candidates.join(', '),
-            result: `**${chosen}**`,
-            type: 'choice',
-        };
+            return {
+                expression: candidates.join(', '),
+                result: `**${chosen}**`,
+                type: 'choice',
+            };
+        }
     }
 
-    // 🚫 아무 조건도 만족 안 하면 오류
     return {
         expression: trimmed,
-        result: '❌ 계산할 수 없는 입력입니다.',
+        result: '❌ 계산식 또는 쉼표로 구분한 선택지를 입력해주세요. 예: `/c (사과, 배, 복숭아)`',
         type: 'normal',
     };
 }

@@ -3,9 +3,9 @@ import { config } from 'dotenv';
 import { parseCommand } from './parser';
 import { handleRollCommand } from './rollHandler';
 import { parseCalcCommand } from './calcHandler';
+import { handleCocCommand } from './cocHandler';
 import { handleOmikujiCommand } from './omikujiHandler';
 import { pickMenu, addMenu, removeMenu, listMenus } from './menuHandler';
-import { handleTimerCommand } from './timerHandler';
 import { rescheduleNextTimer } from './timerService';
 import { handleTimerCreate, handleTimerList, handleTimerCancel, handleTimerClear } from './timerHandler';
 
@@ -21,7 +21,11 @@ client.on('ready', () => {
 });
 
 client.on('messageCreate', async (message) => {
-  if (message.author.bot) return;
+  // 자기 자신의 출력에는 반응하지 않습니다.
+  if (message.author.id === client.user?.id) return;
+
+  // 일반 봇 메시지는 무시하지만, Tupperbox 같은 웹훅 메시지는 허용합니다.
+  if (message.author.bot && !message.webhookId) return;
 
   const content = message.content.trim();
   const parsed = parseCommand(content);
@@ -34,6 +38,8 @@ client.on('messageCreate', async (message) => {
   } else if (parsed.type.includes('calc')) {
     const result = parseCalcCommand(parsed.body);
     reply = typeof result === 'string' ? result : result.result;
+  } else if (parsed.type === 'coc') {
+    reply = handleCocCommand(parsed.body);
   } else if (parsed.type === 'omikuji') {
     reply = handleOmikujiCommand();
   } else if (parsed.type === 'menu') {
@@ -59,12 +65,14 @@ client.on('messageCreate', async (message) => {
   }
 
   if (reply !== undefined) {
-    await message.reply(reply);
+    await message.reply({
+      content: reply,
+      allowedMentions: { parse: [] },
+    });
   }
 });
 
 client.login(process.env.BOT_TOKEN);
-
 
 import http from 'http';
 
@@ -75,4 +83,3 @@ http.createServer((_, res) => {
 }).listen(PORT, () => {
     console.log(`🌐 Render용 HTTP 서버 실행됨 (포트 ${PORT})`);
 });
-
