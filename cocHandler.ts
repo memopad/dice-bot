@@ -41,7 +41,7 @@ export function parseCocRollCommand(body: string): ParsedCocRoll | null {
     const normalized = body.normalize('NFKC').trim();
 
     const match = normalized.match(
-        /^cc\s*([+-]?\s*\d+)?\s*(?:<=|≤)\s*(\d{1,3})\s*[.!?。！？…]*$/i,
+        /^cc\s*([+-]?\s*\d+)?\s*(?:<=|≤)\s*(\d{1,3})(?!\d)[\s\S]*$/i,
     );
 
     if (!match) return null;
@@ -101,13 +101,8 @@ export function handleCocRollCommand(parsed: ParsedCocRoll): string {
         ].join('\n');
     }
 
-    const mode = result.bonus > 0
-        ? `낮은 값 채택 (cc${result.bonus})`
-        : `높은 값 채택 (cc${result.bonus})`;
-
     return [
         `🎲 \`${diceCount}D100 = [${result.rolls.join(', ')}]\` / 기준값 \`${result.target}\``,
-        `${mode} → 채택 \`${result.selectedRoll}\``,
         `**${result.judgement}**`,
     ].join('\n');
 }

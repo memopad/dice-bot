@@ -17,9 +17,6 @@ function safeInt(expr: string, name: string, min: number, max: number): number {
     return integer;
 }
 
-function appendLabel(result: string, label?: string): string {
-    return label ? `${result}\n↳ ${label}` : result;
-}
 
 export function handleRollCommand(body: string): string {
     try {
@@ -44,7 +41,7 @@ export function handleRollCommand(body: string): string {
                 : 0;
 
             const result = rollCriticalDice(count, threshold, bonus);
-            return appendLabel(formatCriticalResult(result), parsed.label);
+            return formatCriticalResult(result);
         }
 
         const result = rollNormalDice(
@@ -55,7 +52,7 @@ export function handleRollCommand(body: string): string {
             parsed.compareTarget
         );
 
-        return appendLabel(formatNormalResult(result), parsed.label);
+        return formatNormalResult(result);
     } catch (error) {
         return (error as Error).message || '❌ 오류';
     }
