@@ -1,9 +1,8 @@
-﻿import { Client, GatewayIntentBits } from 'discord.js';
+import { Client, GatewayIntentBits } from 'discord.js';
 import { config } from 'dotenv';
 import { parseCommand } from './parser';
 import { handleRollCommand } from './rollHandler';
 import { parseCalcCommand } from './calcHandler';
-import { handleCocCommand } from './cocHandler';
 import { handleOmikujiCommand } from './omikujiHandler';
 import { pickMenu, addMenu, removeMenu, listMenus } from './menuHandler';
 import { rescheduleNextTimer } from './timerService';
@@ -38,8 +37,6 @@ client.on('messageCreate', async (message) => {
   } else if (parsed.type.includes('calc')) {
     const result = parseCalcCommand(parsed.body);
     reply = typeof result === 'string' ? result : result.result;
-  } else if (parsed.type === 'coc') {
-    reply = handleCocCommand(parsed.body);
   } else if (parsed.type === 'omikuji') {
     reply = handleOmikujiCommand();
   } else if (parsed.type === 'menu') {

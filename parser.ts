@@ -5,7 +5,6 @@ export type CommandType =
     | 'secret-calc'
     | 'choice'
     | 'secret-choice'
-    | 'coc'
     | 'omikuji'
     | 'menu'
     | 'menu-add'
@@ -24,12 +23,6 @@ export interface ParsedCommand {
 export function parseCommand(input: string): ParsedCommand | null {
     // 전각 문자(ＣＣ＜＝６０ 등)를 일반 문자로 통일합니다.
     const trimmed = input.normalize('NFKC').trim();
-
-    // CoC 7판 판정: cc<=60 / CC <= 60 / cc≤60
-    const cocMatch = trimmed.match(/^cc\s*(?:<=|≤)\s*(\d{1,3})\s*[.!?。！？…]*$/i);
-    if (cocMatch) {
-        return { type: 'coc', body: cocMatch[1]! };
-    }
 
     if (/^\/t\s+/i.test(trimmed)) {
         return { type: 'timer', body: trimmed.replace(/^\/t\s+/i, '').trim() };

@@ -1,7 +1,8 @@
-﻿import { parseRollCommand } from './parser';
+import { parseRollCommand } from './parser';
 import { rollCriticalDice, formatCriticalResult } from './critical';
 import { rollNormalDice, formatNormalResult } from './normal';
 import { evaluate } from 'mathjs';
+import { parseCocRollCommand, handleCocRollCommand } from './cocHandler';
 
 function safeInt(expr: string, name: string, min: number, max: number): number {
     const value = evaluate(expr);
@@ -22,6 +23,10 @@ function appendLabel(result: string, label?: string): string {
 
 export function handleRollCommand(body: string): string {
     try {
+        // CoC 판정도 /r 명령 안에서 처리합니다.
+        const coc = parseCocRollCommand(body);
+        if (coc) return handleCocRollCommand(coc);
+
         const parsed = parseRollCommand(body);
         if (!parsed) return '❌ 명령어 파싱 오류입니다.';
 
