@@ -70,34 +70,27 @@ export function parseCalcCommand(input: string): CalcResult {
         }
     }
 
-    // /c (선택지1, 선택지2, 선택지3)
-    // 바깥 괄호만 제거하고, 쉼표만 기준으로 나눕니다.
-    // 따라서 "매운 라면"처럼 공백이 포함된 선택지도 하나로 유지됩니다.
-    const normalized =
-        trimmed.startsWith('(') && trimmed.endsWith(')')
-            ? trimmed.slice(1, -1).trim()
-            : trimmed;
+    // 괄호로 전체를 감쌌다면 쉼표 기준, 그 외에는 공백 기준으로 선택합니다.
+    // /c (1 2, 3 4, 5 6) => ["1 2", "3 4", "5 6"]
+    // /c ㄱ ㄴ ㄷ => ["ㄱ", "ㄴ", "ㄷ"]
+    const parenthesized = trimmed.startsWith('(') && trimmed.endsWith(')');
+    const normalized = parenthesized ? trimmed.slice(1, -1).trim() : trimmed;
+    const candidates = (parenthesized ? normalized.split(',') : normalized.split(/\s+/))
+        .map(value => value.trim())
+        .filter(value => value.length > 0);
 
-    if (normalized.includes(',')) {
-        const candidates = normalized
-            .split(',')
-            .map((value) => value.trim())
-            .filter((value) => value.length > 0);
-
-        if (candidates.length >= 2) {
-            const chosen = candidates[Math.floor(Math.random() * candidates.length)];
-
-            return {
-                expression: candidates.join(', '),
-                result: `**${chosen}**`,
-                type: 'choice',
-            };
-        }
+    if (candidates.length >= 2) {
+        const chosen = candidates[Math.floor(Math.random() * candidates.length)]!;
+        return {
+            expression: candidates.join(parenthesized ? ', ' : ' '),
+            result: `**${chosen}**`,
+            type: 'choice',
+        };
     }
 
     return {
         expression: trimmed,
-        result: '❌ 계산식 또는 쉼표로 구분한 선택지를 입력해주세요. 예: `/c (사과, 배, 복숭아)`',
+        result: '❌ 계산식 또는 선택지를 입력해줘. 예: `/c ㄱ ㄴ ㄷ` 또는 `/c (1 2, 3 4, 5 6)`',
         type: 'normal',
     };
 }

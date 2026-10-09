@@ -10,6 +10,8 @@ export type CommandType =
     | 'menu-add'
     | 'menu-remove'
     | 'menu-list'
+    | 'recommend-add'
+    | 'recommend-list'
     | 'timer'
     | 'timer-list'
     | 'timer-cancel'
@@ -35,6 +37,13 @@ export function parseCommand(input: string): ParsedCommand | null {
     }
     if (/^\/tclear$/i.test(trimmed)) {
         return { type: 'timer-clear', body: '' };
+    }
+
+    if (/^\/추천목록(?:\s|$)/.test(trimmed)) {
+        return { type: 'recommend-list', body: trimmed.slice('/추천목록'.length).trim() };
+    }
+    if (/^\/추천(?:\s|$)/.test(trimmed)) {
+        return { type: 'recommend-add', body: trimmed.slice('/추천'.length).trim() };
     }
 
     if (trimmed === '/오미쿠지') {
