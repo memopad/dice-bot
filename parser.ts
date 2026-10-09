@@ -11,6 +11,8 @@ export type CommandType =
     | 'menu-remove'
     | 'menu-list'
     | 'recommend-add'
+    | 'recommend-remove'
+    | 'recommend-edit'
     | 'recommend-list'
     | 'timer'
     | 'timer-list'
@@ -39,6 +41,12 @@ export function parseCommand(input: string): ParsedCommand | null {
         return { type: 'timer-clear', body: '' };
     }
 
+    if (/^\/추천삭제(?:\s|$)/.test(trimmed)) {
+        return { type: 'recommend-remove', body: trimmed.slice('/추천삭제'.length).trim() };
+    }
+    if (/^\/추천수정(?:\s|$)/.test(trimmed)) {
+        return { type: 'recommend-edit', body: trimmed.slice('/추천수정'.length).trim() };
+    }
     if (/^\/추천목록(?:\s|$)/.test(trimmed)) {
         return { type: 'recommend-list', body: trimmed.slice('/추천목록'.length).trim() };
     }

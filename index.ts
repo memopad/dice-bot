@@ -5,7 +5,7 @@ import { handleRollCommand } from './rollHandler';
 import { parseCalcCommand } from './calcHandler';
 import { handleOmikujiCommand } from './omikujiHandler';
 import { pickMenu, addMenu, removeMenu, listMenus } from './menuHandler';
-import { addRecommendation, listRecommendations } from './recommendHandler';
+import { addRecommendation, listRecommendations, removeRecommendation, editRecommendation } from './recommendHandler';
 import { rescheduleNextTimer } from './timerService';
 import { handleTimerCreate, handleTimerList, handleTimerCancel, handleTimerClear } from './timerHandler';
 
@@ -50,6 +50,10 @@ client.on('messageCreate', async (message) => {
     reply = listMenus();
   } else if (parsed.type === 'recommend-add') {
     reply = addRecommendation(parsed.body);
+  } else if (parsed.type === 'recommend-remove') {
+    reply = removeRecommendation(parsed.body);
+  } else if (parsed.type === 'recommend-edit') {
+    reply = editRecommendation(parsed.body);
   } else if (parsed.type === 'recommend-list') {
     reply = listRecommendations(parsed.body);
   } else if (parsed.type === 'timer') {
